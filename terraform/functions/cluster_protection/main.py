@@ -130,7 +130,7 @@ def configure_falcon_deployment_manifest(is_autopilot: bool) -> Dict[str, Any]:
         },
     }
 
-    # Base autopilot config
+    # Start with base autopilot config
     autopilot_config = {
         "backend": "bpf",
         "gke": {"autopilot": True},
@@ -138,36 +138,39 @@ def configure_falcon_deployment_manifest(is_autopilot: bool) -> Dict[str, Any]:
         "tolerations": [{"effect": "NoSchedule", "operator": "Equal", "key": "kubernetes.io/arch", "value": "amd64"}],
     }
 
-    # Add auto-update configuration if specified
-    if FALCON_AUTO_UPDATE != "off":
-        if "advanced" not in autopilot_config:
-            autopilot_config["advanced"] = {}
-        autopilot_config["advanced"]["autoUpdate"] = FALCON_AUTO_UPDATE
-        logging.info(f"Auto-update enabled with mode: {FALCON_AUTO_UPDATE}")
+    # Build node config (applied to all clusters, not just autopilot)
+    node_config = {}
 
-    # Add update policy if specified
-    if FALCON_UPDATE_POLICY:
-        if "advanced" not in autopilot_config:
-            autopilot_config["advanced"] = {}
-        autopilot_config["advanced"]["updatePolicy"] = FALCON_UPDATE_POLICY
-        logging.info(f"Using update policy: {FALCON_UPDATE_POLICY}")
+    # Add advanced settings if specified
+    if FALCON_AUTO_UPDATE != "off" or FALCON_UPDATE_POLICY:
+        node_config["advanced"] = {}
 
-    # Add specific sensor version if specified (overrides auto-update)
+        if FALCON_AUTO_UPDATE != "off":
+            node_config["advanced"]["autoUpdate"] = FALCON_AUTO_UPDATE
+            logging.info(f"Auto-update enabled with mode: {FALCON_AUTO_UPDATE}")
+
+        if FALCON_UPDATE_POLICY:
+            node_config["advanced"]["updatePolicy"] = FALCON_UPDATE_POLICY
+            logging.info(f"Using update policy: {FALCON_UPDATE_POLICY}")
+
+    # Add specific sensor version if specified
     if FALCON_SENSOR_VERSION:
-        autopilot_config["version"] = FALCON_SENSOR_VERSION
+        node_config["version"] = FALCON_SENSOR_VERSION
         logging.info(f"Pinning sensor version to: {FALCON_SENSOR_VERSION}")
 
-    # Add sensor tags if specified
+    # Merge autopilot-specific config if needed
+    if is_autopilot:
+        node_config.update(autopilot_config)
+
+    # Add sensor tags if specified (goes in falcon spec, not node spec)
     if FALCON_SENSOR_TAGS:
         if "falcon" not in manifest["spec"]:
             manifest["spec"]["falcon"] = {}
         manifest["spec"]["falcon"]["tags"] = FALCON_SENSOR_TAGS
         logging.info(f"Adding sensor tags: {FALCON_SENSOR_TAGS}")
 
-    node_config = {"node": autopilot_config}
-
-    if is_autopilot:
-        manifest["spec"]["falconNodeSensor"] = node_config
+    # Add node config to manifest
+    manifest["spec"]["falconNodeSensor"] = {"node": node_config}
 
     # convert back to yaml and write file
     manifest_yaml = yaml.dump(manifest)
