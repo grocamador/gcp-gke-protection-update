@@ -33,3 +33,32 @@ variable "scope" {
 variable "scope_identifier" {
   type = string
 }
+
+variable "falcon_auto_update" {
+  type        = string
+  default     = "off"
+  description = "Falcon sensor auto-update mode (off, normal, force)"
+
+  validation {
+    condition     = contains(["off", "normal", "force"], var.falcon_auto_update)
+    error_message = "falcon_auto_update must be one of: off, normal, force"
+  }
+}
+
+variable "falcon_update_policy" {
+  type        = string
+  default     = ""
+  description = "Falcon sensor update policy name from Falcon UI (optional)"
+}
+
+variable "falcon_sensor_version" {
+  type        = string
+  default     = ""
+  description = "Specific Falcon sensor version to install (e.g., 6.35.0-13207)"
+}
+
+variable "falcon_sensor_tags" {
+  type        = string
+  default     = ""
+  description = "Comma-separated sensor grouping tags (e.g., Environment/Production,Team/Security)"
+}
