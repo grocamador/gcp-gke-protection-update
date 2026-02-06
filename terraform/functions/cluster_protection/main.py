@@ -35,7 +35,6 @@ FALCON_CLIENT_ID = os.environ["FALCON_CLIENT_ID"]
 FALCON_CLIENT_SECRET = os.environ["FALCON_CLIENT_SECRET"]
 FALCON_AUTO_UPDATE = os.environ.get("FALCON_AUTO_UPDATE", "off")
 FALCON_UPDATE_POLICY = os.environ.get("FALCON_UPDATE_POLICY", "")
-FALCON_SENSOR_VERSION = os.environ.get("FALCON_SENSOR_VERSION", "")
 FALCON_SENSOR_TAGS = os.environ.get("FALCON_SENSOR_TAGS", "")
 
 
@@ -152,11 +151,6 @@ def configure_falcon_deployment_manifest(is_autopilot: bool) -> Dict[str, Any]:
         if FALCON_UPDATE_POLICY:
             node_config["advanced"]["updatePolicy"] = FALCON_UPDATE_POLICY
             logging.info(f"Using update policy: {FALCON_UPDATE_POLICY}")
-
-    # Add specific sensor version if specified
-    if FALCON_SENSOR_VERSION:
-        node_config["version"] = FALCON_SENSOR_VERSION
-        logging.info(f"Pinning sensor version to: {FALCON_SENSOR_VERSION}")
 
     # Merge autopilot-specific config if needed
     if is_autopilot:

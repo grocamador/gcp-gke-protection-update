@@ -45,7 +45,6 @@ resource "google_cloudfunctions2_function" "cluster_protection" {
       FALCON_CLIENT_SECRET  = var.falcon_client_secret
       FALCON_AUTO_UPDATE    = var.falcon_auto_update
       FALCON_UPDATE_POLICY  = var.falcon_update_policy
-      FALCON_SENSOR_VERSION = var.falcon_sensor_version
       FALCON_SENSOR_TAGS    = var.falcon_sensor_tags
     }
   }

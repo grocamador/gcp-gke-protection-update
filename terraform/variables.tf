@@ -51,12 +51,6 @@ variable "falcon_update_policy" {
   description = "Falcon sensor update policy name from Falcon UI (optional)"
 }
 
-variable "falcon_sensor_version" {
-  type        = string
-  default     = ""
-  description = "Specific Falcon sensor version to install (e.g., 6.35.0-13207)"
-}
-
 variable "falcon_sensor_tags" {
   type        = string
   default     = ""
